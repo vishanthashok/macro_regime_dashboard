@@ -95,7 +95,7 @@ The dashboard displays:
 ### 1. Clone repository
 
 ```bash
-git clone <your-repo-url>
+git clone [<(https://github.com/vishanthashok/macro_regime_dashboard)>]
 cd macro_regime_dashboard
 ```
 
