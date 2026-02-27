@@ -75,24 +75,23 @@ momentum = data["SPY"].pct_change(126)
 # Volatility proxy
 volatility = returns["SPY"].rolling(30).std()
 
-# Regime logic
-regime = []
+# Align momentum & volatility on common dates and drop NaNs
+mv = pd.concat(
+    [momentum.rename("momentum"), volatility.rename("volatility")],
+    axis=1
+).dropna()
 
-for i in range(len(momentum)):
-    if momentum.iloc[i] > 0 and volatility.iloc[i] < volatility.median():
-        regime.append("Expansion")
-    elif momentum.iloc[i] < 0 and volatility.iloc[i] > volatility.median():
-        regime.append("Recession")
-    elif momentum.iloc[i] > 0 and volatility.iloc[i] > volatility.median():
-        regime.append("Late Cycle")
-    else:
-        regime.append("Recovery")
+# Regime logic (vectorized)
+median_vol = mv["volatility"].median()
 
-regime = pd.Series(regime, index=momentum.index)
+regime = pd.Series(index=mv.index, dtype="object")
+regime[(mv["momentum"] > 0) & (mv["volatility"] < median_vol)] = "Expansion"
+regime[(mv["momentum"] < 0) & (mv["volatility"] > median_vol)] = "Recession"
+regime[(mv["momentum"] > 0) & (mv["volatility"] > median_vol)] = "Late Cycle"
+regime[regime.isna()] = "Recovery"
 
 # Align everything
-df = pd.concat([returns, regime], axis=1).dropna()
-df.columns = list(returns.columns) + ["Regime"]
+df = pd.concat([returns, regime.rename("Regime")], axis=1).dropna()
 
 # ----------------------------------------
 # REGIME PERFORMANCE
