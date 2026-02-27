@@ -1,11 +1,3 @@
-# macro_regime_dashboard
-
-Let’s make this README look **clean, technical, and resume-ready**.
-
-You can paste this directly into a `README.md` file in your project root.
-
----
-
 # 📈 Macro Regime Detector & Dynamic Allocation Engine
 
 A Python-based macro regime classification and portfolio allocation dashboard built with Streamlit.
