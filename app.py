@@ -26,7 +26,8 @@ def load_data():
     data = pd.DataFrame()
 
     for name, ticker in tickers.items():
-        df = yf.download(ticker, start="2005-01-01")
+        # Explicitly use column grouping so we always get a flat column index
+        df = yf.download(ticker, start="2005-01-01", group_by="column")
         data[name] = df["Adj Close"]
 
     data = data.dropna()
