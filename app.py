@@ -26,9 +26,37 @@ def load_data():
     data = pd.DataFrame()
 
     for name, ticker in tickers.items():
-        # Explicitly use column grouping so we always get a flat column index
-        df = yf.download(ticker, start="2005-01-01", group_by="column")
-        data[name] = df["Adj Close"]
+        df = yf.download(ticker, start="2005-01-01")
+
+        # Handle both normal and MultiIndex column formats from yfinance
+        cols = df.columns
+        series = None
+
+        if "Adj Close" in cols:
+            series = df["Adj Close"]
+        elif "Close" in cols:
+            # Fallback if only non-adjusted close is available
+            series = df["Close"]
+        elif isinstance(cols, pd.MultiIndex):
+            # Try common MultiIndex layouts
+            if ("Adj Close", ticker) in cols:
+                series = df[("Adj Close", ticker)]
+            elif (ticker, "Adj Close") in cols:
+                series = df[(ticker, "Adj Close")]
+            elif ("Close", ticker) in cols:
+                series = df[("Close", ticker)]
+            elif (ticker, "Close") in cols:
+                series = df[(ticker, "Close")]
+
+        if series is None:
+            # As a very last resort, just take the first numeric column
+            numeric_cols = df.select_dtypes(include="number").columns
+            if len(numeric_cols) == 0:
+                st.error(f"Could not find a price column for {ticker}. Columns: {list(cols)}")
+                st.stop()
+            series = df[numeric_cols[0]]
+
+        data[name] = series
 
     data = data.dropna()
     return data
