@@ -493,16 +493,13 @@ with st.container():
             text=regime.values,
             hovertemplate="%{x|%Y-%m-%d}<br><b>%{text}</b><extra></extra>",
         ))
-        fig_regime.update_layout(
-            **PLOT_THEME,
-            height=220,
-            showlegend=False,
-            yaxis=dict(
-                tickvals=[-1, -0.5, 0.5, 1],
-                ticktext=["Recession", "Recovery", "Late Cycle", "Expansion"],
-                **PLOT_THEME["yaxis"],
-            ),
+        regime_layout = {**PLOT_THEME}
+        regime_layout["yaxis"] = dict(
+            tickvals=[-1, -0.5, 0.5, 1],
+            ticktext=["Recession", "Recovery", "Late Cycle", "Expansion"],
+            **PLOT_THEME["yaxis"],
         )
+        fig_regime.update_layout(**regime_layout, height=220, showlegend=False)
         st.plotly_chart(fig_regime, use_container_width=True, config={"displayModeBar": False})
 
 
